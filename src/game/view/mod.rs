@@ -1,11 +1,31 @@
-mod game_view;
+pub mod game_view;
+pub mod result_view;
 
 use crate::game::rule::Rule;
+
+pub enum Controller {
+    W,
+    A,
+    S,
+    D,
+    Esc,
+    Space,
+}
 
 pub trait View {
     const MAX_WIDTH: usize = 48;
     const MAX_HEIGHT: usize = 4;
+
+    // red
+    const PRIMARY_COLOR: &'static str = "\x1b[31m";
+    // blue
+    const SECONDARY_COLOR: &'static str = "\x1b[34m";
+    // default
+    const DEFAULT_COLOR: &'static str = "\x1b[0m";
+
     fn render(&self, game_rule: &Rule) -> String;
+    fn key_down(&self) -> Controller;
+
     fn clear(&mut self) -> String {
         let mut s = String::new();
         for _ in 0..Self::MAX_HEIGHT {
@@ -43,6 +63,14 @@ pub trait View {
             terminal_string.push_str("\n");
         }
         terminal_string
+    }
+
+    fn throw_view() -> String {
+        let mut s = String::new();
+        for _ in 0..Self::MAX_HEIGHT {
+            s.push_str("\n");
+        }
+        s
     }
 }
 
