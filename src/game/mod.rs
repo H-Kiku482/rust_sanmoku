@@ -1,2 +1,2 @@
-mod rule;
-mod view;
+pub mod rule;
+pub mod view;
