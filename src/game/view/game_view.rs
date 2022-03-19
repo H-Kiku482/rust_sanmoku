@@ -1,7 +1,5 @@
 use crate::game::rule::{FieldStates, Players, Rule};
-use crate::game::view::{Controller, View};
-use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use crate::game::view::View;
 
 pub struct GameView {
     current_point: usize,
@@ -45,95 +43,9 @@ impl View for GameView {
                 terminal_view.push_str("\n");
             }
         }
-        terminal_view.push_str("\x1b[");
-        terminal_view.push_str(&Self::MAX_HEIGHT.to_string());
-        terminal_view.push_str("A\r");
-        terminal_view
-    }
-
-    fn key_down(&self) -> Controller {
-        let err = enable_raw_mode();
-        let key: Controller;
-        loop {
-            match err {
-                Ok(()) => {
-                    match read().unwrap() {
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char('w'),
-                            modifiers: KeyModifiers::NONE,
-                        }) => {
-                            key = Controller::W;
-                        }
-
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char('a'),
-                            modifiers: KeyModifiers::NONE,
-                        }) => {
-                            key = Controller::A;
-                        }
-
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char('s'),
-                            modifiers: KeyModifiers::NONE,
-                        }) => {
-                            key = Controller::S;
-                        }
-
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char('d'),
-                            modifiers: KeyModifiers::NONE,
-                        }) => {
-                            key = Controller::D;
-                        }
-
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Esc,
-                            modifiers: KeyModifiers::NONE,
-                        }) => {
-                            key = Controller::Esc;
-                        }
-
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char(' '),
-                            modifiers: KeyModifiers::NONE,
-                        }) => {
-                            key = Controller::Space;
-                        }
-
-                        Event::Key(KeyEvent {
-                            code: KeyCode::Char('c'),
-                            modifiers: KeyModifiers::CONTROL,
-                        }) => {
-                            let err = disable_raw_mode();
-                            match err {
-                                Err(err) => {
-                                    panic!("there was a problem {:?}", err);
-                                }
-                                _ => {}
-                            }
-                            print!("\n\n\n\n");
-                            panic!();
-                        }
-
-                        _ => {
-                            continue;
-                        }
-                    }
-                    let err = disable_raw_mode();
-                    match err {
-                        Err(err) => {
-                            panic!("there was a problem {:?}", err);
-                        }
-                        _ => {}
-                    }
-                    break;
-                }
-                Err(err) => {
-                    panic!("there was a problem {:?}", err);
-                }
-            }
-        }
-        return key;
+        let mut s = self.fill_space(&terminal_view);
+        s.push_str(&self.reset_cursor());
+        s
     }
 }
 
@@ -190,8 +102,9 @@ impl GameView {
 mod tests {
     use super::*;
     use crate::game::rule::Winner;
+    use crate::game::view::Controller;
     #[test]
-    fn render_test() {
+    fn game_view_render_test() {
         let game = Rule {
             fields: [
                 FieldStates::Empty,
@@ -210,6 +123,7 @@ mod tests {
         };
         let game_view = GameView::new();
         print!("{}", game_view.render(&game));
+        print!("\n\n\n\n");
     }
 
     #[test]
